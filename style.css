@@ -1,0 +1,395 @@
+/* General Body and Container Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #eef1f5; /* Light grey background */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+.container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Soft, subtle shadow */
+    width: 100%;
+    max-width: 1200px; /* Increased max-width for table layout */
+    box-sizing: border-box;
+}
+
+h1, h2 {
+    color: #2c3e50; /* Darker blue-grey for headings */
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+p {
+    line-height: 1.6;
+}
+
+.warning-message {
+    text-align: center;
+    color: #d35400; /* Orange-red for warnings */
+    font-weight: bold;
+    background-color: #fef0e6;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid #e67e22;
+}
+
+/* --- Tabs Styling --- */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #e0e6ed;
+}
+
+.tab-button {
+    background-color: transparent;
+    border: none;
+    padding: 12px 25px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #555;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-button:hover {
+    color: #3498db; /* Blue on hover */
+}
+
+.tab-button.active {
+    color: #3498db; /* Active tab blue */
+    border-bottom: 3px solid #3498db;
+    background-color: #f7f9fc; /* Light background for active tab */
+}
+
+.tab-content {
+    display: none;
+    padding: 20px 0;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* --- Form Elements & Buttons --- */
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #444;
+}
+
+input[type="text"],
+input[type="date"],
+select,
+textarea {
+    width: calc(100% - 20px); /* Account for padding */
+    padding: 8px 10px; /* Slightly smaller padding */
+    margin-bottom: 10px; /* Reduced margin */
+    border: 1px solid #ccd6e0; /* Light grey border */
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 0.95em;
+    background-color: #fefefe; /* Off-white background */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+    border-color: #3498db; /* Blue border on focus */
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); /* Soft blue shadow on focus */
+    outline: none;
+}
+
+input[type="checkbox"] {
+    transform: scale(1.3); /* Make checkboxes slightly larger */
+    margin-right: 8px;
+    vertical-align: middle;
+    cursor: pointer;
+    accent-color: #3498db; /* Blue checkmark */
+}
+
+button {
+    background-color: #3498db; /* Standard blue button */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-right: 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+button:hover {
+    background-color: #2980b9; /* Darker blue on hover */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+/* Specific button colors */
+#exportDataBtn, #importDataBtn {
+    background-color: #f39c12; /* Orange for export/import */
+}
+#exportDataBtn:hover, #importDataBtn:hover {
+    background-color: #e67e22; /* Darker orange */
+}
+#clearDataBtn {
+    background-color: #e74c3c; /* Red for clear data */
+}
+#clearDataBtn:hover {
+    background-color: #c0392b; /* Darker red */
+}
+
+/* --- Dashboard & Progress --- */
+#examCountdown {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #e74c3c; /* Red for countdown */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.progress-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    height: 25px;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #2ecc71; /* Green for progress */
+    border-radius: 8px;
+    text-align: center;
+    line-height: 25px;
+    color: white;
+    width: 0%;
+    transition: width 0.5s ease-out;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+#overallProgress, #subjectProgress {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f7f9fc;
+    border-radius: 10px;
+    box-shadow: inset 0 1px 5px rgba(0,0,0,0.05); /* Inner shadow */
+}
+
+#subjectProgress h4 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #34495e;
+    font-size: 1.1em;
+}
+
+#subjectProgress .progress-bar {
+    background-color: #5dade2; /* Different blue for subject progress */
+}
+
+.section-divider {
+    margin: 30px 0;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+/* --- Task List (Table) --- */
+.filter-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: #f7f9fc;
+    border-radius: 10px;
+    border: 1px solid #e0e6ed;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 180px; /* Adjust min-width for filters */
+}
+.filter-group label {
+    margin-bottom: 5px;
+    font-weight: normal;
+}
+.filter-group select {
+    margin-bottom: 0;
+}
+
+
+.task-table-container {
+    max-height: 600px; /* Fixed height for scrolling */
+    overflow-y: auto;
+    border: 1px solid #e0e6ed;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    background-color: #ffffff;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0;
+    font-size: 0.9em; /* Slightly smaller font for table */
+    line-height: 1.4;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eef1f5; /* Lighter border for rows */
+}
+
+th {
+    background-color: #f0f4f7; /* Light grey background for header */
+    color: #444;
+    font-weight: 600;
+    position: sticky; /* Make header sticky */
+    top: 0;
+    z-index: 10; /* Ensure it stays above scrolling content */
+}
+
+/* Zebra striping for rows */
+tr:nth-child(even) {
+    background-color: #f7f9fc;
+}
+
+/* Hover effect for rows */
+tr:hover {
+    background-color: #e9f5ff; /* Light blue on hover */
+    transition: background-color 0.2s ease;
+}
+
+/* Specific column widths for better layout */
+th:nth-child(1), td:nth-child(1) { width: 60px; /* ID */ }
+th:nth-child(2), td:nth-child(2) { width: 90px; /* Subject */ }
+th:nth-child(3), td:nth-child(3) { width: 220px; /* Reading Name */ }
+th:nth-child(4), td:nth-child(4) { width: 60px; text-align: center;} /* Video Checkbox */
+th:nth-child(5), td:nth-child(5) { width: 110px; } /* Video Date */
+th:nth-child(6), td:nth-child(6) { width: 60px; text-align: center;} /* Rev1 Checkbox */
+th:nth-child(7), td:nth-child(7) { width: 110px; } /* Rev1 Date */
+th:nth-child(8), td:nth-child(8) { width: 100px; } /* Confidence */
+th:nth-child(9), td:nth-child(9) { width: auto; /* Remarks */ }
+th:nth-child(10), td:nth-child(10) { width: 100px; /* Overall Status */ }
+
+
+td input[type="date"],
+td select,
+td textarea {
+    width: calc(100% - 16px); /* Adjust width for padding */
+    margin-bottom: 0;
+    padding: 6px 8px; /* Smaller padding within table cells */
+    font-size: 0.85em; /* Smaller font within table cells */
+}
+
+td textarea {
+    resize: vertical;
+    min-height: 35px; /* Minimum height for textarea */
+}
+
+.centered-content {
+    text-align: center;
+}
+
+/* Styles for blocked/locked tasks */
+.locked {
+    opacity: 0.6; /* Dim locked rows */
+    pointer-events: none; /* Disable interaction */
+    background-color: #fcfcfc !important; /* Force light background */
+    color: #777; /* Dim text */
+}
+.locked td {
+    background-color: #fcfcfc !important; /* Ensure all cells are light */
+}
+
+/* Status Colors for Table Cells */
+td.status-cell {
+    font-weight: bold;
+    padding: 6px 10px;
+    border-radius: 5px;
+    text-align: center;
+    white-space: nowrap; /* Prevent status text from wrapping */
+}
+td.status-Pending { background-color: #f9e79f; color: #8d6a00; } /* Yellow */
+td.status-InProgress { background-color: #AED6F1; color: #1f5a87; } /* Light Blue */
+td.status-Completed { background-color: #A9DFBF; color: #1e8449; } /* Light Green */
+td.status-Blocked { background-color: #F5B7B1; color: #a93226; } /* Light Red */
+
+/* Confidence Colors (for select background) */
+td select.confidence-Low { background-color: #f9d7da; } /* Light Red */
+td select.confidence-Medium { background-color: #fef0cd; } /* Light Yellow */
+td select.confidence-High { background-color: #d4f4e7; } /* Light Green */
+
+.error-message {
+    color: red;
+    text-align: center;
+    padding: 10px;
+    background-color: #ffe0e0;
+    border: 1px solid red;
+    border-radius: 5px;
+    display: none;
+    margin-top: 20px;
+}
+
+/* --- Data Management Section --- */
+.data-management {
+    margin-top: 30px;
+    padding: 25px;
+    border: 1px solid #e0e6ed;
+    border-radius: 10px;
+    background-color: #f7f9fc;
+    box-shadow: inset 0 1px 5px rgba(0,0,0,0.05);
+}
+.data-management textarea {
+    width: calc(100% - 22px);
+    min-height: 120px;
+    font-family: 'Cascadia Code', 'Fira Code', monospace; /* Monospace for data */
+    font-size: 0.9em;
+    background-color: #fdfdfd;
+}
+.data-management .button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    justify-content: flex-start; /* Align buttons to start */
+}
+
+/* Loader spinner */
+.loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+    display: none;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
