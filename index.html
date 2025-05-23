@@ -1,1 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Study Tracker</title>
+    <link rel="stylesheet" href="style.css"> </head>
+<body>
+    <div class="container">
+        <h1>Advanced Study Progress Tracker</h1>
+        <p class="warning-message">
+            IMPORTANT: Data is saved ONLY in this browser. It does NOT sync and can be lost if browser data is cleared.
+            Use the "Data Tools" tab to export a backup regularly.
+        </p>
 
+        <div class="tabs">
+            <button class="tab-button active" data-tab="dashboard">Dashboard</button>
+            <button class="tab-button" data-tab="myTasks">My Tasks</button>
+            <button class="tab-button" data-tab="dataTools">Data Tools</button>
+        </div>
+
+        <div id="dashboard" class="tab-content active">
+            <h2>Overall Progress</h2>
+            <p id="examCountdown"></p>
+            <div id="overallProgressBarContainer" class="progress-container">
+                <div id="overallProgressBar" class="progress-bar">0%</div>
+            </div>
+            <p><span id="completedTasks">0</span> / <span id="totalTasks">0</span> Tasks Completed</p>
+
+            <hr class="section-divider">
+
+            <div id="subjectProgress">
+                <h2>Progress by Subject</h2>
+                </div>
+        </div>
+
+        <div id="myTasks" class="tab-content">
+            <h2>My Study Readings</h2>
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label for="filterSubject">Subject:</label>
+                    <select id="filterSubject"><option value="">All Subjects</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterStatus">Overall Status:</label>
+                    <select id="filterStatus">
+                        <option value="">All</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Blocked">Blocked</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterConfidence">Confidence:</label>
+                    <select id="filterConfidence">
+                        <option value="">All</option>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+            </div>
+            <div id="loader" class="loader"></div>
+            <div class="task-table-container">
+                <table id="taskTable">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Reading Name</th>
+                            <th class="centered-content">Video Done</th>
+                            <th>Video Date</th>
+                            <th class="centered-content">SCH Quiz</th>
+                            <th>SCH Date</th>
+                            <th class="centered-content">UWorld Quiz</th>
+                            <th>UWorld Date</th>
+                            <th class="centered-content">Rev 1 Done</th>
+                            <th>Rev 1 Date</th>
+                            <th class="centered-content">Rev 2 Done</th>
+                            <th>Rev 2 Date</th>
+                            <th class="centered-content">Rev 3 Done</th>
+                            <th>Rev 3 Date</th>
+                            <th>Confidence</th>
+                            <th>Issue Remarks</th>
+                            <th>Overall Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskListBody">
+                        </tbody>
+                </table>
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div id="dataTools" class="tab-content">
+            <div class="data-management">
+                <h2>Data Management (Backup/Restore)</h2>
+                <p>You can copy the text below to back up your data, or paste a previous backup here and click "Import".</p>
+                <textarea id="dataTextarea" placeholder="For export: data will appear here. For import: paste data here."></textarea><br>
+                <div class="button-group">
+                    <button id="exportDataBtn">Export Data</button>
+                    <button id="importDataBtn">Import Data</button>
+                    <button id="clearDataBtn" class="clear-button">Clear All Study Data (Warning!)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const EXAM_DATE_STRING = "2025-11-23"; // Your exam date
+        const LOCAL_STORAGE_KEY = 'studyTrackerData_V3_DarkTheme'; // Changed key for this version
+        let tasks = [];
+
+        // --- Initial Data (Your provided list) ---
+        const initialTasksData = [
+            { Task_ID: "QUANT_1", Subject: "Quant", Reading_Name: "Basics of Multiple Regression and Underlying Assumptions" },
+            { Task_ID: "QUANT_2", Subject: "Quant", Reading_Name: "Evaluating Regression Model Fit and Interpreting Model Results" },
+            { Task_ID: "QUANT_3", Subject: "Quant", Reading_Name: "Model Misspecification" },
+            { Task_ID: "QUANT_4", Subject: "Quant", Reading_Name: "Extensions of Multiple Regression" },
+            { Task_ID: "QUANT_5", Subject: "Quant", Reading_Name: "Time-Series Analysis" },
+            { Task_ID: "QUANT_6", Subject: "Quant", Reading_Name: "Machine Learning" },
+            { Task_ID: "QUANT_7", Subject: "Quant", Reading_Name: "Big Data Projects" },
+            { Task_ID: "ECON_8", Subject: "Econ", Reading_Name: "Currency Exchange Rates: Understanding Equilibrium Value" },
+            { Task_ID: "ECON_9", Subject: "Econ", Reading_Name: "Economic Growth" },
+            { Task_ID: "FSA_10", Subject: "FSA", Reading_Name: "Intercorporate Investments" },
+            { Task_ID: "FSA_11", Subject: "FSA", Reading_Name: "Employee Compensation: Post-Employment and Share-Based" },
+            { Task_ID: "FSA_12", Subject: "FSA", Reading_Name: "Multinational Operations" },
+            { Task_ID: "FSA_13", Subject: "FSA", Reading_Name: "Analysis of Financial Institutions" },
+            { Task_ID: "FSA_14", Subject: "FSA", Reading_Name: "Evaluating Quality of Financial Reports" },
+            { Task_ID: "FSA_15", Subject: "FSA", Reading_Name: "Integration of Financial Statement Analysis Techniques" },
+            { Task_ID: "CORP_16", Subject: "Corp", Reading_Name: "Analysis of Dividends and Share Repurchases" },
+            { Task_ID: "CORP_17", Subject: "Corp", Reading_Name: "Environmental, Social, and Governance (ESG) Considerations in Investment Analysis" },
+            { Task_ID: "CORP_18", Subject: "Corp", Reading_Name: "Cost of Capital: Advanced Topics" },
+            { Task_ID: "CORP_19", Subject: "Corp", Reading_Name: "Corporate Restructuring" },
+            { Task_ID: "EQUITY_20", Subject: "Equity", Reading_Name: "Equity Valuation: Applications and Processes" },
+            { Task_ID: "EQUITY_21", Subject: "Equity", Reading_Name: "Discounted Dividend Valuation" },
+            { Task_ID: "EQUITY_22", Subject: "Equity", Reading_Name: "Free Cash Flow Valuation" },
+            { Task_ID: "EQUITY_23", Subject: "Equity", Reading_Name: "Market-Based Valuation: Price and Enterprise Value Multiples" },
+            { Task_ID: "EQUITY_24", Subject: "Equity", Reading_Name: "Residual Income Valuation" },
+            { Task_ID: "EQUITY_25", Subject: "Equity", Reading_Name: "Private Company Valuation" },
+            { Task_ID: "FINCOME_26", Subject: "F Income", Reading_Name: "The Term Structure and Interest Rate Dynamics" },
+            { Task_ID: "FINCOME_27", Subject: "F Income", Reading_Name: "The Arbitrage-Free Valuation Framework" },
+            { Task_ID: "FINCOME_28", Subject: "F Income", Reading_Name: "Valuation and Analysis of Bonds with Embedded Options" },
+            { Task_ID: "FINCOME_29", Subject: "F Income", Reading_Name: "Credit Analysis Models" },
+            { Task_ID: "FINCOME_30", Subject: "F Income", Reading_Name: "Credit Default Swaps" },
+            { Task_ID: "DERIV_31", Subject: "Derivatives", Reading_Name: "Pricing and Valuation of Forward Commitments" },
+            { Task_ID: "DERIV_32", Subject: "Derivatives", Reading_Name: "Valuation of Contingent Claims" },
+            { Task_ID: "ALTINV_33", Subject: "Alt Inv", Reading_Name: "Introduction to Commodities and Commodity Derivatives" },
+            { Task_ID: "ALTINV_34", Subject: "Alt Inv", Reading_Name: "Overview of Types of Real Estate Investment" },
+            { Task_ID: "ALTINV_35", Subject: "Alt Inv", Reading_Name: "Investments in Real Estate through Publicly Traded Securities" },
+            { Task_ID: "ALTINV_36", Subject: "Alt Inv", Reading_Name: "Hedge Fund Strategies" },
+            { Task_ID: "PORTMGT_37", Subject: "Port Mgmt", Reading_Name: "Economics and Investment Markets" },
+            { Task_ID: "PORTMGT_38", Subject: "Port Mgmt", Reading_Name: "Analysis of Active Portfolio Management" },
+            { Task_ID: "PORTMGT_39", Subject: "Port Mgmt", Reading_Name: "Exchange-Traded Funds: Mechanics and Applications" },
+            { Task_ID: "PORTMGT_40", Subject: "Port Mgmt", Reading_Name: "Using Multifactor Models" },
+            { Task_ID: "PORTMGT_41", Subject: "Port Mgmt", Reading_Name: "Measuring and Managing Market Risk" },
+            { Task_ID: "PORTMGT_42", Subject: "Port Mgmt", Reading_Name: "Backtesting and Simulation" },
+            { Task_ID: "ETHICS_43", Subject: "Ethics", Reading_Name: "Code of Ethics and Standards of Professional Conduct" },
+            { Task_ID: "ETHICS_44", Subject: "Ethics", Reading_Name: "Guidance for Standards I–VII" },
+            { Task_ID: "ETHICS_45", Subject: "Ethics", Reading_Name: "Application of the Code and Standards: Level II" }
+        ];
+
+        // --- DOM Elements ---
+        const loader = document.getElementById('loader');
+        const taskListBody = document.getElementById('taskListBody');
+        const errorMessageDiv = document.getElementById('errorMessage');
+        const overallProgressBar = document.getElementById('overallProgressBar');
+        const completedTasksSpan = document.getElementById('completedTasks');
+        const totalTasksSpan = document.getElementById('totalTasks');
+        const subjectProgressDiv = document.getElementById('subjectProgress');
+        const filterSubjectSelect = document.getElementById('filterSubject');
+        const filterStatusSelect = document.getElementById('filterStatus');
+        const filterConfidenceSelect = document.getElementById('filterConfidence');
+        const examCountdownEl = document.getElementById('examCountdown');
+        const exportDataBtn = document.getElementById('exportDataBtn');
+        const importDataBtn = document.getElementById('importDataBtn');
+        const clearDataBtn = document.getElementById('clearDataBtn');
+        const dataTextarea = document.getElementById('dataTextarea');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+
+        // --- Initialization ---
+        window.onload = function() {
+            loadTasks();
+            updateExamCountdown();
+            setInterval(updateExamCountdown, 1000 * 60);
+
+            filterSubjectSelect.addEventListener('change', renderTasks);
+            filterStatusSelect.addEventListener('change', renderTasks);
+            filterConfidenceSelect.addEventListener('change', renderTasks);
+
+            exportDataBtn.addEventListener('click', exportData);
+            importDataBtn.addEventListener('click', importData);
+            clearDataBtn.addEventListener('click', clearAllData);
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tab = button.dataset.tab;
+                    activateTab(tab);
+                });
+            });
+            activateTab('dashboard'); // Default to dashboard
+        };
+
+        function activateTab(tabName) {
+            tabButtons.forEach(button => {
+                if (button.dataset.tab === tabName) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+
+            tabContents.forEach(content => {
+                if (content.id === tabName) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+
+            if (tabName === 'myTasks') {
+                renderTasks(); // Ensure tasks are rendered when 'My Tasks' tab is opened
+            } else if (tabName === 'dashboard') {
+                updateDashboard(); // Refresh dashboard when it's opened
+            }
+        }
+
+        function getTodayDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function updateExamCountdown() {
+            const examDate = new Date(EXAM_DATE_STRING);
+            const now = new Date();
+            const diffTime = examDate - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays > 0) {
+                examCountdownEl.innerHTML = `${diffDays} days until Exam (${new Date(EXAM_DATE_STRING).toLocaleDateString()})`;
+            } else if (diffDays === 0) {
+                examCountdownEl.textContent = "Exam is Today! Good luck!";
+            } else {
+                examCountdownEl.textContent = "Exam date has passed.";
+            }
+        }
+
+        function initializeTask(taskData) {
+            // Ensure all necessary fields exist with defaults and are boolean for checkboxes
+            const defaults = {
+                Prerequisite_Task_ID: "",
+                Video_Completed: false, Video_Comp_Date: "",
+                SCH_Quiz_Completed: false, SCH_Quiz_Date: "", // New field
+                UWorld_Quiz_Completed: false, UWorld_Quiz_Date: "", // New field
+                Rev_1_Completed: false, Rev_1_Date: "",
+                Rev_2_Completed: false, Rev_2_Date: "", // New field
+                Rev_3_Completed: false, Rev_3_Date: "", // New field
+                Confidence: "",
+                Issue_Remarks: "",
+                Last_Updated: ""
+            };
+            // Merge defaults and existing data, ensuring booleans are handled
+            const merged = { ...defaults, ...taskData };
+            // Explicitly convert to boolean if stored as non-boolean (e.g., 'true' string)
+            for (const key of ['Video_Completed', 'SCH_Quiz_Completed', 'UWorld_Quiz_Completed', 'Rev_1_Completed', 'Rev_2_Completed', 'Rev_3_Completed']) {
+                merged[key] = !!merged[key];
+            }
+            return merged;
+        }
+
+        function loadTasks() {
+            showLoader(true);
+            const savedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (savedTasks) {
+                tasks = JSON.parse(savedTasks).map(initializeTask); // Ensure all fields are present after loading
+            } else {
+                // First time load: Use initial data and ensure all fields are present
+                tasks = initialTasksData.map(initializeTask);
+                saveTasks(); // Save the initialized structure
+            }
+            processTasks(); // Calculate statuses and prerequisites
+            populateFilters();
+            renderTasks();
+            updateDashboard();
+            showLoader(false);
+        }
+
+        function processTasks() {
+            // Calculate individual completion status for all tasks
+            tasks.forEach(task => {
+                // A task is 'completed' if all its defined sub-tasks are done
+                task.isCompleted = task.Video_Completed && task.SCH_Quiz_Completed && task.UWorld_Quiz_Completed &&
+                                   task.Rev_1_Completed && task.Rev_2_Completed && task.Rev_3_Completed;
+            });
+
+            // Calculate overall status based on prerequisites and individual completion
+            tasks.forEach(task => {
+                if (task.Prerequisite_Task_ID) {
+                    const prereq = tasks.find(t => t.Task_ID === task.Prerequisite_Task_ID);
+                    task.isPrerequisiteMet = prereq ? prereq.isCompleted : true;
+                } else {
+                    task.isPrerequisiteMet = true;
+                }
+
+                if (!task.isPrerequisiteMet) {
+                    task.overallStatus = "Blocked";
+                } else if (task.isCompleted) {
+                    task.overallStatus = "Completed";
+                } else if (task.Video_Completed || task.SCH_Quiz_Completed || task.UWorld_Quiz_Completed ||
+                           task.Rev_1_Completed || task.Rev_2_Completed || task.Rev_3_Completed) {
+                    // If at least one part is completed but not all, it's in progress
+                    task.overallStatus = "In Progress";
+                } else {
+                    task.overallStatus = "Pending";
+                }
+            });
+        }
+
+        function saveTasks() {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tasks));
+        }
+
+        function populateFilters() {
+            const subjects = [...new Set(tasks.map(task => task.Subject).filter(Boolean))];
+            filterSubjectSelect.innerHTML = '<option value="">All Subjects</option>';
+            subjects.sort().forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                filterSubjectSelect.appendChild(option);
+            });
+        }
+
+        function renderTasks() {
+            taskListBody.innerHTML = '';
+            const filteredTasks = getFilteredTasks();
+
+            if (filteredTasks.length === 0) {
+                taskListBody.innerHTML = '<tr><td colspan="17" style="text-align:center; padding: 20px;">No tasks match your current filters.</td></tr>';
+                return;
+            }
+
+            // Function to format date for display (Month Day)
+            const formatDateDisplay = (dateString) => {
+                if (!dateString) return '';
+                const date = new Date(dateString);
+                // Adjust for UTC/local time interpretation to prevent day shifts
+                const offset = date.getTimezoneOffset();
+                date.setMinutes(date.getMinutes() + offset);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            };
+
+            filteredTasks.forEach(task => {
+                const row = taskListBody.insertRow();
+                row.dataset.taskId = task.Task_ID;
+                if (!task.isPrerequisiteMet) {
+                    row.classList.add('locked');
+                }
+
+                let statusCellClass = `status-${task.overallStatus?.replace(/\s+/g, '')}`;
+
+                row.innerHTML = `
+                    <td>${task.Subject || 'N/A'}</td>
+                    <td>${task.Reading_Name || 'N/A'}</td>
+                    <td class="centered-content">
+                        <input type="checkbox" id="video_comp_${task.Task_ID}"
+                               data-field="Video_Completed" data-date-field="Video_Comp_Date" ${task.Video_Completed ? 'checked' : ''}
+                               ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                    </td>
+                    <td class="date-display-cell">
+                        <input type="date" class="date-input-hidden" id="video_date_${task.Task_ID}"
+                               value="${task.Video_Comp_Date || ''}" data-field="Video_Comp_Date"
+                               ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                        <span class="display-date">${formatDateDisplay(task.Video_Comp_Date)}</span>
+                    </td>
+                    <td class="centered-content">
+                        <input type="checkbox" id="sch_quiz_comp_${task.Task_ID}"
+                               data-field="SCH_Quiz_Completed" data-date-field="SCH_Quiz_Date" ${task.SCH_Quiz_Completed ? 'checked' : ''}
+                               ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                    </td>
+                    <td class="date-display-cell">
+                        <input type="date" class="date-input-hidden" id="sch_quiz_date_${task.Task_ID}"
+                               value="${task.SCH_Quiz_Date || ''}" data-field="SCH_Quiz_Date"
+                               ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                        <span class="display-date">${formatDateDisplay(task.SCH_Quiz_Date)}</span>
+                    </td>
+                    <td class="centered-content">
+                        <input type="checkbox" id="uworld_quiz_comp_${task.Task_ID}"
+                               data-field="UWorld_Quiz_Completed" data-date-field="UWorld_Quiz_Date" ${task.UWorld_Quiz_Completed ? 'checked' : ''}
+                               ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                    </td>
+                    <td class="date-display-cell">
+                        <input type="date" class="date-input-hidden" id="uworld_quiz_date_${task.Task_ID}"
+                               value="${task.UWorld_Quiz_Date || ''}" data-field="UWorld_Quiz_Date"
+                               ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                        <span class="display-date">${formatDateDisplay(task.UWorld_Quiz_Date)}</span>
+                    </td>
+                    <td class="centered-content">
+                        <input type="checkbox" id="rev1_comp_${task.Task_ID}"
+                               data-field="Rev_1_Completed" data-date-field="Rev_1_Date" ${task.Rev_1_Completed ? 'checked' : ''}
+                               ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                    </td>
+                    <td class="date-display-cell">
+                        <input type="date" class="date-input-hidden" id="rev1_date_${task.Task_ID}"
+                               value="${task.Rev_1_Date || ''}" data-field="Rev_1_Date"
+                               ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                        <span class="display-date">${formatDateDisplay(task.Rev_1_Date)}</span>
+                    </td>
+                     <td class="centered-content">
+                        <input type="checkbox" id="rev2_comp_${task.Task_ID}"
+                               data-field="Rev_2_Completed" data-date-field="Rev_2_Date" ${task.Rev_2_Completed ? 'checked' : ''}
+                               ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                    </td>
+                    <td class="date-display-cell">
+                        <input type="date" class="date-input-hidden" id="rev2_date_${task.Task_ID}"
+                               value="${task.Rev_2_Date || ''}" data-field="Rev_2_Date"
+                               ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                        <span class="display-date">${formatDateDisplay(task.Rev_2_Date)}</span>
+                    </td>
+                    <td class="centered-content">
+                        <input type="checkbox" id="rev3_comp_${task.Task_ID}"
+                               data-field="Rev_3_Completed" data-date-field="Rev_3_Date" ${task.Rev_3_Completed ? 'checked' : ''}
+                               ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                    </td>
+                    <td class="date-display-cell">
+                        <input type="date" class="date-input-hidden" id="rev3_date_${task.Task_ID}"
+                               value="${task.Rev_3_Date || ''}" data-field="Rev_3_Date"
+                               ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                        <span class="display-date">${formatDateDisplay(task.Rev_3_Date)}</span>
+                    </td>
+                    <td>
+                        <select id="confidence_${task.Task_ID}" data-field="Confidence"
+                                class="confidence-${task.Confidence}" ${!task.isPrerequisiteMet ? 'disabled' : ''}>
+                                ${createConfidenceOptions(task.Confidence)}
+                        </select>
+                    </td>
+                    <td>
+                        <textarea id="remarks_${task.Task_ID}" data-field="Issue_Remarks" rows="2"
+                                  ${!task.isPrerequisiteMet ? 'disabled' : ''}>${task.Issue_Remarks || ''}</textarea>
+                    </td>
+                    <td class="status-cell ${statusCellClass}">${task.overallStatus}</td>
+                `;
+            });
+
+            // Attach event listeners after rendering
+            taskListBody.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', handleCheckboxUpdate);
+            });
+            taskListBody.querySelectorAll('.date-display').forEach(displaySpan => {
+                displaySpan.addEventListener('click', (event) => {
+                    const hiddenInput = event.target.previousElementSibling;
+                    if (hiddenInput && hiddenInput.classList.contains('date-input-hidden')) {
+                        // Trigger the date picker
+                        hiddenInput.focus();
+                        hiddenInput.showPicker(); // This method exists on HTMLInputElement
+                    }
+                });
+            });
+            taskListBody.querySelectorAll('input[type="date"]').forEach(dateInput => {
+                dateInput.addEventListener('change', (event) => {
+                    const taskId = event.target.closest('tr').dataset.taskId;
+                    const field = event.target.dataset.field;
+                    const value = event.target.value;
+                    const taskToUpdate = tasks.find(t => t.Task_ID === taskId);
+                    if (taskToUpdate) {
+                        taskToUpdate[field] = value;
+                        taskToUpdate.Last_Updated = new Date().toISOString();
+                        saveTasks();
+                        processTasks();
+                        updateDashboard();
+                        // Update the visible span
+                        const displaySpan = event.target.nextElementSibling;
+                        if (displaySpan && displaySpan.classList.contains('display-date')) {
+                            displaySpan.textContent = formatDateDisplay(value);
+                        }
+                    }
+                });
+            });
+            taskListBody.querySelectorAll('select, textarea').forEach(el => {
+                el.addEventListener('change', handleFieldUpdate);
+            });
+        }
+
+        function getFilteredTasks() {
+            const subjectFilter = filterSubjectSelect.value;
+            const statusFilter = filterStatusSelect.value;
+            const confidenceFilter = filterConfidenceSelect.value;
+
+            return tasks.filter(task => {
+                const subjectMatch = !subjectFilter || task.Subject === subjectFilter;
+                const statusMatch = !statusFilter || task.overallStatus === statusFilter;
+                const confidenceMatch = !confidenceFilter || task.Confidence === confidenceFilter;
+                return subjectMatch && statusMatch && confidenceMatch;
+            });
+        }
+
+        function createConfidenceOptions(currentConfidence) {
+            const levels = ["", "Low", "Medium", "High"];
+            return levels.map(l => `<option value="${l}" ${l === currentConfidence ? 'selected' : ''}>${l}</option>`).join('');
+        }
+
+        function handleCheckboxUpdate(event) {
+            const checkbox = event.target;
+            const field = checkbox.dataset.field; // e.g., 'Video_Completed'
+            const dateField = checkbox.dataset.dateField; // e.g., 'Video_Comp_Date'
+            const taskId = checkbox.closest('tr').dataset.taskId;
+            const isChecked = checkbox.checked;
+
+            const taskToUpdate = tasks.find(t => t.Task_ID === taskId);
+            if (taskToUpdate) {
+                taskToUpdate[field] = isChecked;
+
+                if (dateField) {
+                    taskToUpdate[dateField] = isChecked ? getTodayDate() : '';
+                    // Update the date input element in the DOM directly
+                    const dateInput = document.getElementById(`${dateField.toLowerCase().replace(/_comp/g, '').replace(/_/g, '')}_${taskId}`);
+                    if (dateInput) {
+                        dateInput.value = taskToUpdate[dateField];
+                        // Also update the visible span
+                        const displaySpan = dateInput.nextElementSibling;
+                        if (displaySpan && displaySpan.classList.contains('display-date')) {
+                            // Ensure formatDateDisplay is called here
+                            displaySpan.textContent = dateInput.value ? new Date(dateInput.value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+                        }
+                    }
+                }
+                taskToUpdate.Last_Updated = new Date().toISOString();
+            }
+            processTasks(); // Recalculate statuses after change
+            saveTasks();
+            renderTasks(); // Re-render to ensure visual consistency and updated blocking
+            updateDashboard(); // Update dashboard progress
+        }
+
+        function handleFieldUpdate(event) {
+            const el = event.target;
+            const field = el.dataset.field;
+            const taskId = el.closest('tr').dataset.taskId;
+            const value = el.value;
+
+            const taskToUpdate = tasks.find(t => t.Task_ID === taskId);
+            if (taskToUpdate) {
+                taskToUpdate[field] = value;
+                taskToUpdate.Last_Updated = new Date().toISOString();
+            }
+            processTasks(); // Recalculate statuses after change
+            saveTasks();
+            renderTasks(); // Re-render to ensure visual consistency and updated blocking
+            updateDashboard(); // Update dashboard progress
+        }
+
+        function updateDashboard() {
+            const completedCount = tasks.filter(task => task.overallStatus === 'Completed').length;
+            const totalCount = tasks.length;
+
+            totalTasksSpan.textContent = totalCount;
+            completedTasksSpan.textContent = completedCount;
+
+            const overallPercentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+            overallProgressBar.style.width = `${overallPercentage}%`;
+            overallProgressBar.textContent = `${overallPercentage}%`;
+
+            subjectProgressDiv.innerHTML = '<h2>Progress by Subject</h2>'; // Reset to keep heading
+            const subjects = [...new Set(tasks.map(task => task.Subject).filter(Boolean))];
+            subjects.sort().forEach(subject => {
+                const subjectTasks = tasks.filter(task => task.Subject === subject);
+                const subjectCompleted = subjectTasks.filter(task => task.overallStatus === 'Completed').length;
+                const subjectTotal = subjectTasks.length;
+                const subjectPercentage = subjectTotal > 0 ? Math.round((subjectCompleted / subjectTotal) * 100) : 0;
+
+                const subjectProgressHTML = `<h4>${subject} (${subjectCompleted}/${subjectTotal})</h4>
+                <div class="progress-container"><div class="progress-bar" style="width:${subjectPercentage}%;">${subjectPercentage}%</div></div>`;
+                subjectProgressDiv.innerHTML += subjectProgressHTML;
+            });
+        }
+
+        function exportData() {
+            dataTextarea.value = JSON.stringify(tasks, null, 2); // Pretty print JSON
+            alert("Data copied to the textbox below. You can copy this text and save it in a file as a backup. For example, you can save it as 'CFA Save File.json' in your Downloads folder.");
+        }
+
+        function importData() {
+            const dataToImport = dataTextarea.value;
+            if (!dataToImport) {
+                alert("Please paste your previously exported data into the textbox first.");
+                return;
+            }
+            try {
+                const importedTasks = JSON.parse(dataToImport);
+                if (Array.isArray(importedTasks)) {
+                    if (confirm("Are you sure you want to overwrite current data with the imported data?")) {
+                        tasks = importedTasks.map(initializeTask); // Ensure fields on import too
+                        processTasks();
+                        saveTasks();
+                        populateFilters(); // In case subjects changed
+                        renderTasks();
+                        updateDashboard();
+                        dataTextarea.value = ""; // Clear textarea
+                        alert("Data imported successfully!");
+                    }
+                } else {
+                    alert("Import failed: The data doesn't seem to be in the correct format.");
+                }
+            } catch (e) {
+                console.error("Import error:", e);
+                alert("Import failed: Invalid JSON data. Please ensure you pasted the exact text from a previous export.");
+            }
+        }
+
+        function clearAllData() {
+            if (confirm("WARNING! Are you absolutely sure you want to clear ALL your study data? This cannot be undone unless you have a backup!")) {
+                if (confirm("SECOND WARNING! Please confirm again you want to erase everything.")) {
+                    tasks = initialTasksData.map(initializeTask); // Reset to initial pre-loaded data
+                    processTasks();
+                    saveTasks();
+                    populateFilters();
+                    renderTasks();
+                    updateDashboard();
+                    alert("All data has been reset to the initial list.");
+                }
+            }
+        }
+
+        function showLoader(show) { loader.style.display = show ? 'block' : 'none'; }
+        // function showError(message) { errorMessageDiv.textContent = message; errorMessageDiv.style.display = 'block'; }
+
+    </script>
+</body>
+</html>
