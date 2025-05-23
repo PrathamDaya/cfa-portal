@@ -1,1 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Study Tracker</title>
+    <link rel="stylesheet" href="style.css"> </head>
+<body>
+    <div class="container">
+        <h1>Advanced Study Progress Tracker</h1>
+        <p class="warning-message">
+            IMPORTANT: Data is saved ONLY in this browser. It does NOT sync and can be lost if browser data is cleared.
+            Use the "Data Tools" tab to export a backup regularly.
+        </p>
 
+        <div class="tabs">
+            <button class="tab-button active" data-tab="dashboard">Dashboard</button>
+            <button class="tab-button" data-tab="myTasks">My Tasks</button>
+            <button class="tab-button" data-tab="dataTools">Data Tools</button>
+        </div>
+
+        <div id="dashboard" class="tab-content active">
+            <h2>Overall Progress</h2>
+            <p id="examCountdown"></p>
+            <div id="overallProgressBarContainer" class="progress-container">
+                <div id="overallProgressBar" class="progress-bar">0%</div>
+            </div>
+            <p><span id="completedTasks">0</span> / <span id="totalTasks">0</span> Tasks Completed</p>
+
+            <hr class="section-divider">
+
+            <div id="subjectProgress">
+                <h2>Progress by Subject</h2>
+                </div>
+        </div>
+
+        <div id="myTasks" class="tab-content">
+            <h2>My Study Readings</h2>
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label for="filterSubject">Subject:</label>
+                    <select id="filterSubject"><option value="">All Subjects</option></select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterStatus">Overall Status:</label>
+                    <select id="filterStatus">
+                        <option value="">All</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Blocked">Blocked</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterConfidence">Confidence:</label>
+                    <select id="filterConfidence">
+                        <option value="">All</option>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+            </div>
+            <div id="loader" class="loader"></div>
+            <div class="task-table-container">
+                <table id="taskTable">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Reading Name</th>
+                            <th class="centered-content">Video</th>
+                            <th>Video Date</th>
+                            <th class="centered-content">SCH Quiz</th>
+                            <th>SCH Quiz Date</th>
+                            <th class="centered-content">UWorld Quiz</th>
+                            <th>UWorld Quiz Date</th>
+                            <th class="centered-content">Rev 1</th>
+                            <th>Rev 1 Date</th>
+                            <th class="centered-content">Rev 2</th>
+                            <th>Rev 2 Date</th>
+                            <th class="centered-content">Rev 3</th>
+                            <th>Rev 3 Date</th>
+                            <th>Confidence</th>
+                            <th>Issue Remarks</th>
+                            <th>Overall Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskListBody">
+                        </tbody>
+                </table>
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div id="dataTools" class="tab-content">
+            <div class="data-management">
+                <h2>Data Management (Backup/Restore)</h2>
+                <p>You can copy the text below to back up your data, or paste a previous backup here and click "Import".</p>
+                <textarea id="dataTextarea" placeholder="For export: data will appear here. For import: paste data here."></textarea><br>
+                <div class="button-group">
+                    <button id="exportDataBtn">Export Data</button>
+                    <button id="importDataBtn">Import Data</button>
+                    <button id="clearDataBtn" class="clear-button">Clear All Study Data (Warning!)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script> </body>
+</html>
