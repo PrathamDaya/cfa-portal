@@ -1,1 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced Study Tracker</title>
+  <style>
+    /* PASTE YOUR FINAL CSS HERE (the one you shared) */
+  </style>
+</head>
+<body>
+  <!-- PASTE YOUR FINAL HTML HERE (the one you shared) -->
+
+  <script>
+    const EXAM_DATE = new Date("2025-11-23");
+    const STORAGE_KEY = "studyTrackerData_V4_Enhanced";
+
+    let tasks = [];
+    const taskTableBody = document.getElementById("taskListBody");
+    const examCountdownEl = document.getElementById("examCountdown");
+    const overallProgressBar = document.getElementById("overallProgressBar");
+    const completedTasksEl = document.getElementById("completedTasks");
+    const totalTasksEl = document.getElementById("totalTasks");
+    const dataTextarea = document.getElementById("dataTextarea");
+    const errorMessage = document.getElementById("errorMessage");
+
+    const initialTasks = [
+      { Subject: "Quant", Reading_Name: "Basics of Multiple Regression" },
+      { Subject: "Quant", Reading_Name: "Regression Model Fit" },
+      { Subject: "Quant", Reading_Name: "Model Misspecification" },
+      { Subject: "Quant", Reading_Name: "Time-Series Analysis" },
+      { Subject: "Quant", Reading_Name: "Machine Learning" },
+      { Subject: "Econ", Reading_Name: "Currency Exchange Rates" },
+      { Subject: "FRA", Reading_Name: "Intercorporate Investments" }
+    ];
+
+    function calculateCountdown() {
+      const today = new Date();
+      const diffTime = Math.max(EXAM_DATE - today, 0);
+      const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      examCountdownEl.textContent = `${days} days left until your exam. Stay focused!`;
+    }
+
+    function loadTasks() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          tasks = JSON.parse(stored);
+        } catch (e) {
+          errorMessage.textContent = "Failed to parse saved data.";
+          errorMessage.style.display = "block";
+          tasks = initialTasks;
+        }
+      } else {
+        tasks = initialTasks;
+      }
+    }
+
+    function saveTasks() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      taskTableBody.innerHTML = "";
+      let completed = 0;
+
+      tasks.forEach((t, index) => {
+        const tr = document.createElement("tr");
+        const status = t.status || "Pending";
+        const confidence = t.confidence || "Medium";
+
+        tr.innerHTML = `
+          <td>${t.Subject}</td>
+          <td>${t.Reading_Name}</td>
+          <td class="centered-content"><input type="checkbox" ${t.videoDone ? "checked" : ""} /></td>
+          <td class="date-display-cell"><span class="display-date">${t.videoDate || "-"}</span></td>
+          <td class="centered-content"><input type="checkbox" ${t.schDone ? "checked" : ""} /></td>
+          <td>${t.schDate || "-"}</td>
+          <td class="centered-content"><input type="checkbox" ${t.uworldDone ? "checked" : ""} /></td>
+          <td>${t.uworldDate || "-"}</td>
+          <td class="centered-content"><input type="checkbox" ${t.rev1 ? "checked" : ""} /></td>
+          <td>${t.rev1Date || "-"}</td>
+          <td class="centered-content"><input type="checkbox" ${t.rev2 ? "checked" : ""} /></td>
+          <td>${t.rev2Date || "-"}</td>
+          <td class="centered-content"><input type="checkbox" ${t.rev3 ? "checked" : ""} /></td>
+          <td>${t.rev3Date || "-"}</td>
+          <td><select><option ${confidence === "Low" ? "selected" : ""}>Low</option><option ${confidence === "Medium" ? "selected" : ""}>Medium</option><option ${confidence === "High" ? "selected" : ""}>High</option></select></td>
+          <td><textarea>${t.remarks || ""}</textarea></td>
+          <td class="status-cell status-${status.replace(" ", "")}">${status}</td>
+        `;
+        taskTableBody.appendChild(tr);
+
+        if (status === "Completed") completed++;
+      });
+
+      totalTasksEl.textContent = tasks.length;
+      completedTasksEl.textContent = completed;
+      const percent = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
+      overallProgressBar.style.width = percent + "%";
+      overallProgressBar.textContent = percent + "%";
+    }
+
+    function setupTabs() {
+      document.querySelectorAll(".tab-button").forEach(btn =>
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+          document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+          btn.classList.add("active");
+          document.getElementById(btn.dataset.tab).classList.add("active");
+        })
+      );
+    }
+
+    document.getElementById("exportDataBtn").onclick = () => {
+      dataTextarea.value = JSON.stringify(tasks, null, 2);
+    };
+
+    document.getElementById("importDataBtn").onclick = () => {
+      try {
+        const imported = JSON.parse(dataTextarea.value);
+        if (Array.isArray(imported)) {
+          tasks = imported;
+          saveTasks();
+          renderTasks();
+          errorMessage.style.display = "none";
+        } else throw "Invalid format";
+      } catch (e) {
+        errorMessage.textContent = "Invalid data format!";
+        errorMessage.style.display = "block";
+      }
+    };
+
+    document.getElementById("clearDataBtn").onclick = () => {
+      if (confirm("Are you sure you want to clear all data?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        tasks = initialTasks;
+        renderTasks();
+      }
+    };
+
+    calculateCountdown();
+    loadTasks();
+    renderTasks();
+    setupTabs();
+  </script>
+</body>
+</html>
 
